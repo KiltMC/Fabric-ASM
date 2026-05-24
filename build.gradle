@@ -1,26 +1,7 @@
-buildscript {
-	repositories {
-		maven {
-			name = "Fabric"
-			url = "https://maven.fabricmc.net/"
-		}
-		jcenter()
-		maven {
-			name = "Forge"
-			url = "https://files.minecraftforge.net/maven/"
-		}
-		maven { 
-			name = "Jitpack"
-			url 'https://jitpack.io/'
-		}
-	}
-	dependencies {
-        classpath 'com.github.Chocohead:fabric-loom:49aa217'
-	}
+plugins {
+	id 'fabric-loom' version '0.10-SNAPSHOT'
+	id 'maven-publish'
 }
-
-apply plugin: "fabric-loom"
-import net.fabricmc.loom.task.RemappingJar;
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
@@ -31,13 +12,13 @@ version = "2.3"
 
 minecraft {
 	refmapName = "mixins.mm_kilt.refmap.json"
-	AT = file("example/resources/access-transformations.txt")
+	//AT = file("example/resources/access-transformations.txt")
 }
 
 dependencies {
 	minecraft "com.mojang:minecraft:1.14"
-	mappings "net.fabricmc:yarn:1.14+build.1:tiny@gz"
-	modCompile "net.fabricmc:fabric-loader:0.10.0+build.208"
+	mappings "net.fabricmc:yarn:1.14+build.21"
+	modCompileOnly "net.fabricmc:fabric-loader:0.10.0+build.208"
 }
 
 sourceSets {
@@ -62,9 +43,9 @@ sourceSets {
 //	}
 }
 
-jar {
-	AT.include = false
-}
+//jar {
+//	AT.include = false
+//}
 
 //task exampleJar(type: RemappingJar, dependsOn: exampleClasses) {
 //	classifier = "example"
@@ -96,4 +77,20 @@ artifacts {
 //	archives(exampleSourcesJar) {
 //		builtBy exampleSourcesJar
 //	}
+}
+
+publishing {
+	publications {
+		mavenJava(MavenPublication) {
+			from components.java
+		}
+	}
+
+	// See https://docs.gradle.org/current/userguide/publishing_maven.html for information on how to set up publishing.
+	repositories {
+		// Add repositories to publish to here.
+		// Notice: This block does NOT have the same function as the block in the top level.
+		// The repositories here will be used for publishing your artifact, not for
+		// retrieving dependencies.
+	}
 }
