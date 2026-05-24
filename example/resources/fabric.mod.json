@@ -17,12 +17,12 @@
 		"main": [
 			"com.chocohead.mm.testing.ExampleMod"
 		],
-		"mm:early_risers": [
+		"mm_kilt:early_risers": [
 			"com.chocohead.mm.testing.EarlyRiser"
 		]
 	},
 	"depends": {
 		"fabricloader": ">=0.10.0",
-		"mm": ">=2.3"
+		"mm_kilt": ">=2.3"
 	}
 }

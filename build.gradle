@@ -25,11 +25,12 @@ import net.fabricmc.loom.task.RemappingJar;
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
-archivesBaseName = "Manningham Mills"
+archivesBaseName = "Fabric-ASM-Kilt-Edition"
+group = "xyz.bluspring.fork"
 version = "2.3"
 
 minecraft {
-	refmapName = "mixins.mm.refmap.json"
+	refmapName = "mixins.mm_kilt.refmap.json"
 	AT = file("example/resources/access-transformations.txt")
 }
 

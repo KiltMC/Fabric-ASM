@@ -5,7 +5,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-package com.chocohead.mm;
+package xyz.bluspring.fork.mm;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -47,7 +47,7 @@ import org.objectweb.asm.tree.VarInsnNode;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.util.Annotations;
 
-import com.chocohead.mm.api.EnumAdder.EnumAddition;
+import xyz.bluspring.fork.mm.api.EnumAdder.EnumAddition;
 
 final class EnumSubclasser {
 	private static final class StructClassVisitor extends ClassVisitor {
@@ -294,7 +294,7 @@ final class EnumSubclasser {
 								mInsn.owner = struct.getParent();
 								continue; //Don't need the stack replacement
 							} else {
-								String newName = "MMsuper£" + mInsn.name;
+								String newName = "MM$kilt$super£" + mInsn.name;
 								replacements.put(mInsn.name + mInsn.desc, newName + mInsn.desc);
 
 								mInsn.owner = easySwap ? newOwner : struct.name;
@@ -320,7 +320,7 @@ final class EnumSubclasser {
 							method.instructions.insert(previous, new TypeInsnNode(Opcodes.CHECKCAST, newOwner));
 							method.instructions.set(previous, new FieldInsnNode(Opcodes.GETSTATIC, newOwner, addition.name, enumDescriptor));
 						} else {//Any number of arguments to trip up with, easier to make a bridge
-							String bridge = "MMbridge£" + (mInsn.name.startsWith("MMsuper£") ? mInsn.name.substring(8) : mInsn.name);
+							String bridge = "MM$kilt$bridge£" + (mInsn.name.startsWith("MM$kilt$super£") ? mInsn.name.substring(8) : mInsn.name);
 
 							String previous = bridges.put(bridge + mInsn.desc, mInsn.name + mInsn.desc);
 							assert previous == null || previous.equals(mInsn.name + mInsn.desc);

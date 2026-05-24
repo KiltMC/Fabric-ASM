@@ -1,30 +1,30 @@
 {
 	"schemaVersion": 1,
-	"id": "mm",
-	"name": "Manningham Mills",
+	"id": "mm_kilt",
+	"name": "Manningham Mills - Kilt Edition",
 	"description": "The mod to do what asie said Fabric shouldn't allow you to do",
 	"version": "2.3",
-	"icon": "assets/mm/icon.png",
+	"icon": "assets/mm_kilt/icon.png",
 	"authors": [
 		"Chocohead"
 	],
 	"contact": {
-		"homepage": "https://github.com/Chocohead/Fabric-ASM",
-		"sources": "https://github.com/Chocohead/Fabric-ASM",
-		"issues": "https://github.com/Chocohead/Fabric-ASM/issues"
+		"homepage": "https://github.com/KiltMC/Fabric-ASM",
+		"sources": "https://github.com/KiltMC/Fabric-ASM",
+		"issues": "https://github.com/KiltMC/Fabric-ASM/issues"
 	},
 	"license": "MPL-2.0",
 	"environment": "*",
 	"entrypoints": {
 		"main": [
-			"com.chocohead.mm.MM"
+			"xyz.bluspring.fork.mm.MM"
 		]
 	},
 	"depends": {
 		"fabricloader": ">=0.10.0"
 	},
 	"mixins": [{
-		"config": "mixins.mm.json"
+		"config": "mixins.mm_kilt.json"
 	}],
 	"custom": {
 		"modmenu:api": true
