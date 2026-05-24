@@ -1,42 +1,24 @@
-buildscript {
-	repositories {
-		maven {
-			name = "Fabric"
-			url = "https://maven.fabricmc.net/"
-		}
-		jcenter()
-		maven {
-			name = "Forge"
-			url = "https://files.minecraftforge.net/maven/"
-		}
-		maven { 
-			name = "Jitpack"
-			url 'https://jitpack.io/'
-		}
-	}
-	dependencies {
-        classpath 'com.github.Chocohead:fabric-loom:415c6b'
-	}
+plugins {
+	id 'fabric-loom' version '0.10-SNAPSHOT'
+	id 'maven-publish'
 }
-
-apply plugin: "fabric-loom"
-import net.fabricmc.loom.task.RemappingJar;
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 archivesBaseName = "Manningham Mills"
-version = "2.3"
+group = "xyz.bluspring.fork"
+version = "2.4"
 
 minecraft {
-	refmapName = "mixins.mm.refmap.json"
-	AT = file("example/resources/access-transformations.txt")
+	refmapName = "mixins.mm_kilt.refmap.json"
+	//AT = file("example/resources/access-transformations.txt")
 }
 
 dependencies {
-	minecraft "com.mojang:minecraft:1.14 Pre-Release 3"
-	mappings "net.fabricmc:yarn:1.14 Pre-Release 3+build.1:tiny@gz"
-	modCompile "net.fabricmc:fabric-loader:0.7.0+build.171"
+	minecraft "com.mojang:minecraft:1.14"
+	mappings "net.fabricmc:yarn:1.14+build.21"
+	modCompileOnly "net.fabricmc:fabric-loader:0.10.0+build.208"
 }
 
 sourceSets {
@@ -48,51 +30,67 @@ sourceSets {
 			srcDir 'resources'
 		}
 	}
-	example {
-		compileClasspath += main.compileClasspath + main.output
-		annotationProcessorPath = main.annotationProcessorPath
-		java {
-			srcDir 'example/src'
-		}
-		resources {
-			srcDir 'example/resources'
-			exclude "access-transformations.txt"
-		}
-	}
+//	example {
+//		compileClasspath += main.compileClasspath + main.output
+//		annotationProcessorPath = main.annotationProcessorPath
+//		java {
+//			srcDir 'example/src'
+//		}
+//		resources {
+//			srcDir 'example/resources'
+//			exclude "access-transformations.txt"
+//		}
+//	}
 }
 
-jar {
-	AT.include = false
-}
+//jar {
+//	AT.include = false
+//}
 
-task exampleJar(type: RemappingJar, dependsOn: exampleClasses) {
-	classifier = "example"
-	from sourceSets.example.output
-}
+//task exampleJar(type: RemappingJar, dependsOn: exampleClasses) {
+//	classifier = "example"
+//	from sourceSets.example.output
+//}
 
 task sourcesJar(type: Jar, dependsOn: classes) {
 	classifier = "sources"
 	from sourceSets.main.allSource
 }
 
-task exampleSourcesJar(type: RemappingJar, dependsOn: exampleClasses) {
-	classifier = "example-sources"
-	from sourceSets.example.allSource
-}
+//task exampleSourcesJar(type: RemappingJar, dependsOn: exampleClasses) {
+//	classifier = "example-sources"
+//	from sourceSets.example.allSource
+//}
 
-build.dependsOn exampleJar, exampleSourcesJar
+//build.dependsOn exampleJar, exampleSourcesJar
 
 artifacts {
 	archives(remapJar) {
 		builtBy remapJar
 	}
-	archives(exampleJar) {
-		builtBy exampleJar
-	}
+//	archives(exampleJar) {
+//		builtBy exampleJar
+//	}
 	archives(sourcesJar) {
 		builtBy sourcesJar
 	}
-	archives(exampleSourcesJar) {
-		builtBy exampleSourcesJar
+//	archives(exampleSourcesJar) {
+//		builtBy exampleSourcesJar
+//	}
+}
+
+publishing {
+	publications {
+		mavenJava(MavenPublication) {
+			from components.java
+		}
+	}
+
+	// See https://docs.gradle.org/current/userguide/publishing_maven.html for information on how to set up publishing.
+	repositories {
+		// Add repositories to publish to here.
+		// Notice: This block does NOT have the same function as the block in the top level.
+		// The repositories here will be used for publishing your artifact, not for
+		// retrieving dependencies.
 	}
 }

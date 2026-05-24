@@ -5,7 +5,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-package com.chocohead.mm;
+package xyz.bluspring.fork.mm;
 
 import java.io.IOException;
 import java.lang.invoke.MethodHandle;
@@ -52,10 +52,10 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
 import net.fabricmc.loader.api.metadata.CustomValue;
 
-import com.chocohead.mm.EnumSubclasser.StructClass;
-import com.chocohead.mm.api.ClassTinkerers;
-import com.chocohead.mm.api.EnumAdder;
-import com.chocohead.mm.api.EnumAdder.EnumAddition;
+import xyz.bluspring.fork.mm.EnumSubclasser.StructClass;
+import xyz.bluspring.fork.mm.api.ClassTinkerers;
+import xyz.bluspring.fork.mm.api.EnumAdder;
+import xyz.bluspring.fork.mm.api.EnumAdder.EnumAddition;
 
 public final class Plugin implements IMixinConfigPlugin {
 	final List<String> mixins = new ArrayList<>();
@@ -337,11 +337,11 @@ public final class Plugin implements IMixinConfigPlugin {
 	@Override
 	public List<String> getMixins() {
 		//System.out.println("Have " + mixins);
-		FabricLoader.getInstance().getEntrypoints("mm:early_risers", Runnable.class).forEach(Runnable::run);
+		FabricLoader.getInstance().getEntrypoints("mm_kilt:early_risers", Runnable.class).forEach(Runnable::run);
 		for (ModContainer mod : FabricLoader.getInstance().getAllMods()) {
-			if (mod.getMetadata().containsCustomValue("mm:early_risers")) {
+			if (mod.getMetadata().containsCustomValue("mm_kilt:early_risers")) {
 				System.out.println(mod.getMetadata().getName() + " is still using the traditional Early Riser initialisation");
-				for (CustomValue riser : mod.getMetadata().getCustomValue("mm:early_risers").getAsArray()) {
+				for (CustomValue riser : mod.getMetadata().getCustomValue("mm_kilt:early_risers").getAsArray()) {
 					try {
 						Class.forName(riser.getAsString()).asSubclass(Runnable.class).newInstance().run();
 					} catch (ReflectiveOperationException e) {

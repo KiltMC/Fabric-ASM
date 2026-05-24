@@ -5,7 +5,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-package com.chocohead.mm.api;
+package xyz.bluspring.fork.mm.api;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -67,8 +67,8 @@ public final class EnumAdder {
 		 *
 		 * @throws IllegalArgumentException If the factory produces an invalid parameter array
 		 */
-		public Object[] getParameters() {
-			return checkParameters(parameterFactory.get());
+		public Supplier<Object[]> getParameters() {
+			return () -> checkParameters(parameterFactory.get());
 		}
 
 		/**

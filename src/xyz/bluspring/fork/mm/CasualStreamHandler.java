@@ -5,7 +5,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-package com.chocohead.mm;
+package xyz.bluspring.fork.mm;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -60,7 +60,7 @@ public final class CasualStreamHandler extends URLStreamHandler {
 
 	public static URL create(Map<String, byte[]> mixins) {
 		try {
-			return new URL("magic-at", null, -1, "/", new CasualStreamHandler(mixins));
+			return new URL("magic-at-kilt", null, -1, "/", new CasualStreamHandler(mixins));
 		} catch (MalformedURLException e) {
 			throw new RuntimeException("Unexpected error creating URL", e);
 		}

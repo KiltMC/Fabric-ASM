@@ -1,0 +1,12 @@
+{
+	"required": true,
+	"package": "xyz.bluspring.fork.gen.mixin.",
+	"compatibilityLevel": "JAVA_8",
+	"plugin": "xyz.bluspring.fork.mm.Plugin",
+	"mixins": [
+	],
+	"refmap": "mixins.mm_kilt.refmap.json",
+	"injectors": {
+		"defaultRequire": 1
+	}
+}
