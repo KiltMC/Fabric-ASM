@@ -8,7 +8,7 @@ targetCompatibility = 1.8
 
 archivesBaseName = "Manningham Mills"
 group = "xyz.bluspring.fork"
-version = "2.4"
+version = "2.5.1"
 
 minecraft {
 	refmapName = "mixins.mm_kilt.refmap.json"
@@ -19,6 +19,15 @@ dependencies {
 	minecraft "com.mojang:minecraft:1.14"
 	mappings "net.fabricmc:yarn:1.14+build.21"
 	modCompileOnly "net.fabricmc:fabric-loader:0.10.0+build.208"
+}
+
+processResources {
+	inputs.property("version", project.version)
+	filesMatching("fabric.mod.json") {
+		expand([
+		    "version": project.version
+		])
+	}
 }
 
 sourceSets {

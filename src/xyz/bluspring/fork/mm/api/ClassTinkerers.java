@@ -40,8 +40,9 @@ public enum ClassTinkerers {
 	private Map<String, byte[]> clazzes = new HashMap<>();
 	private Map<String, Consumer<ClassNode>> replacers = new HashMap<>();
 	private Map<String, Set<Consumer<ClassNode>>> tinkerers = new HashMap<>();
+	private Map<String, Set<Consumer<ClassNode>>> postTinkerers = new HashMap<>();
 	private Set<EnumAdder> enumExtensions = new HashSet<>();
-	public void hookUp(Consumer<URL> liveURL, Map<String, byte[]> liveClassMap, Map<String, Consumer<ClassNode>> liveReplacers, Map<String, Set<Consumer<ClassNode>>> liveTinkerers, Set<EnumAdder> liveEnums) {
+	public void hookUp(Consumer<URL> liveURL, Map<String, byte[]> liveClassMap, Map<String, Consumer<ClassNode>> liveReplacers, Map<String, Set<Consumer<ClassNode>>> liveTinkerers, Set<EnumAdder> liveEnums, Map<String, Set<Consumer<ClassNode>>> livePostTinkerers) {
 		urlers = url -> {
 			liveURL.accept(url);
 			return true;
@@ -58,6 +59,9 @@ public enum ClassTinkerers {
 
 		liveEnums.addAll(enumExtensions);
 		enumExtensions = liveEnums;
+
+		livePostTinkerers.putAll(postTinkerers);
+		postTinkerers = livePostTinkerers;
 	}
 
 	/**
@@ -149,6 +153,29 @@ public enum ClassTinkerers {
 	public static void addTransformation(String target, Consumer<ClassNode> transformer) {
 		if (transformer == null) throw new IllegalArgumentException("Tried to add null transformer for " + target);
 		INSTANCE.tinkerers.computeIfAbsent(target.replace('.', '/'), k -> new HashSet<>()).add(transformer);
+	}
+
+	/**
+	 * Add a class transformer for the given class {@link target} to allow modifying the bytecode during definition.
+	 * This transformer runs after mixins have been applied.
+	 * <p><b>Does nothing if the target class is already defined</b>
+	 *
+	 * <p>This method is designed when certain elements of the target class are changed by the {@code transformer}.
+	 * For more drastic changes {@link #addReplacement(String, Consumer)} might prove beneficial.
+	 *
+	 * <p>Any {@link #addReplacement(String, Consumer) replacement} will have applied before the {@code transformer}
+	 * is given the {@link ClassNode}. Any number of other Mixins or transformations could have applied also so care
+	 * should be taken that the target of the transformation is as expected.
+	 *
+	 * @param target The name of the class to be transformed
+	 * @param transformer A {@link Consumer} to take the target class's {@link ClassNode} to be tinkered with
+	 *
+	 * @throws NullPointerException If target is {@code null}
+	 * @throws IllegalArgumentException If transformer is {@code null}
+	 */
+	public static void addPostTransformation(String target, Consumer<ClassNode> transformer) {
+		if (transformer == null) throw new IllegalArgumentException("Tried to add null transformer for " + target);
+		INSTANCE.postTinkerers.computeIfAbsent(target.replace('.', '/'), k -> new HashSet<>()).add(transformer);
 	}
 
 	/**

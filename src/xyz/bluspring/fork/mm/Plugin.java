@@ -30,7 +30,6 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import com.google.common.collect.Maps;
-
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
@@ -41,26 +40,25 @@ import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.InnerClassNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
-
 import org.spongepowered.asm.mixin.MixinEnvironment;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
 import org.spongepowered.asm.mixin.transformer.ext.Extensions;
 import org.spongepowered.asm.mixin.transformer.ext.extensions.ExtensionClassExporter;
-
-import net.fabricmc.loader.api.FabricLoader;
-import net.fabricmc.loader.api.ModContainer;
-import net.fabricmc.loader.api.metadata.CustomValue;
-
 import xyz.bluspring.fork.mm.EnumSubclasser.StructClass;
 import xyz.bluspring.fork.mm.api.ClassTinkerers;
 import xyz.bluspring.fork.mm.api.EnumAdder;
 import xyz.bluspring.fork.mm.api.EnumAdder.EnumAddition;
 
+import net.fabricmc.loader.api.FabricLoader;
+import net.fabricmc.loader.api.ModContainer;
+import net.fabricmc.loader.api.metadata.CustomValue;
+
 public final class Plugin implements IMixinConfigPlugin {
 	final List<String> mixins = new ArrayList<>();
 	final Map<String, String> enumStructParents = new HashMap<>();
 	private Map<String, Set<Consumer<ClassNode>>> classModifiers;
+	private Map<String, Set<Consumer<ClassNode>>> postClassModifiers;
 
 	private static Consumer<URL> fishAddURL() {
 		ClassLoader loader = Plugin.class.getClassLoader();
@@ -165,6 +163,33 @@ public final class Plugin implements IMixinConfigPlugin {
 				skipGen = false;
 			}
 		};
+		Map<String, Set<Consumer<ClassNode>>> postClassModifiers = new HashMap<String, Set<Consumer<ClassNode>>>() {
+			private static final long serialVersionUID = 4152702952480161028L;
+			private boolean skipGen = false;
+			private int massPool = 1;
+
+			private void generate(String name, Collection<? extends String> targets) {
+				//System.out.println("Generating " + mixinPackage + name + " with targets " + targets);
+				assert name.indexOf('.') < 0;
+				classGenerators.put('/' + mixinPackage + name + ".class", makeMixinBlob(mixinPackage + name, targets));
+				//ClassTinkerers.define(mixinPackage + name, makeMixinBlob(mixinPackage + name, targets)); ^^^
+				mixins.add(name.replace('/', '.'));
+			}
+
+			@Override
+			public Set<Consumer<ClassNode>> put(String key, Set<Consumer<ClassNode>> value) {
+				if (!skipGen) generate(key, Collections.singleton(key));
+				return super.put(key, value);
+			}
+
+			@Override
+			public void putAll(Map<? extends String, ? extends Set<Consumer<ClassNode>>> m) {
+				skipGen = true;
+				generate("MassExport_" + massPool++, m.keySet());
+				super.putAll(m);
+				skipGen = false;
+			}
+		};
 		Map<String, Consumer<ClassNode>> classReplacers = new HashMap<String, Consumer<ClassNode>>() {
 			private static final long serialVersionUID = -1226882557534215762L;
 			private boolean skipGen = false;
@@ -235,10 +260,11 @@ public final class Plugin implements IMixinConfigPlugin {
 				throw new UnsupportedOperationException();
 			}
 		};
-		ClassTinkerers.INSTANCE.hookUp(fishAddURL(), new UnremovableMap<>(classGenerators), new UnremovableMap<>(classReplacers), new UnremovableMap<>(classModifiers), enumExtenders);
+		ClassTinkerers.INSTANCE.hookUp(fishAddURL(), new UnremovableMap<>(classGenerators), new UnremovableMap<>(classReplacers), new UnremovableMap<>(classModifiers), enumExtenders, new UnremovableMap<>(postClassModifiers));
 
 		ClassTinkerers.addURL(CasualStreamHandler.create(classGenerators));
 		this.classModifiers = classModifiers;
+		this.postClassModifiers = postClassModifiers;
 
 		//System.out.println("Loaded initially with: " + classModifiers);
 
@@ -382,6 +408,13 @@ public final class Plugin implements IMixinConfigPlugin {
 
 	@Override
 	public void postApply(String targetClassName, ClassNode targetClass, String mixinClassName, IMixinInfo mixinInfo) {
+		Set<Consumer<ClassNode>> transformations = postClassModifiers.get(targetClassName.replace('.', '/'));
+		if (transformations != null) {
+			for (Consumer<ClassNode> transformer : transformations) {
+				transformer.accept(targetClass);
+			}
+		}
+
 		targetClass.interfaces.remove(mixinClassName.replace('.', '/'));
 	}
 }
