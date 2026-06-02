@@ -290,6 +290,7 @@ public final class Plugin implements IMixinConfigPlugin {
 		}
 
 		extensions.add(new Extension(mixinPackage, classReplacers));
+		extensions.add(new PostTransform(postClassModifiers));
 		ExtensionClassExporter exporter = extensions.getExtension(ExtensionClassExporter.class);
 		CasualStreamHandler.dumper = (name, bytes) -> {
 			ClassNode node = new ClassNode(); //Read the bytes in as per TreeTransformer#readClass(byte[])
@@ -408,13 +409,6 @@ public final class Plugin implements IMixinConfigPlugin {
 
 	@Override
 	public void postApply(String targetClassName, ClassNode targetClass, String mixinClassName, IMixinInfo mixinInfo) {
-		Set<Consumer<ClassNode>> transformations = postClassModifiers.get(targetClassName.replace('.', '/'));
-		if (transformations != null) {
-			for (Consumer<ClassNode> transformer : transformations) {
-				transformer.accept(targetClass);
-			}
-		}
-
 		targetClass.interfaces.remove(mixinClassName.replace('.', '/'));
 	}
 }
