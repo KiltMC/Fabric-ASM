@@ -8,6 +8,7 @@
 package xyz.bluspring.fork.mm;
 
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Consumer;
 
 import org.objectweb.asm.tree.ClassNode;
@@ -20,10 +21,15 @@ import org.spongepowered.asm.mixin.transformer.ext.ITargetClassContext;
 final class Extension implements IExtension {
 	private final String mixinPackage;
 	private final Map<String, Consumer<ClassNode>> classReplacers;
+	private final Map<String, Set<Consumer<ClassNode>>> postClassModifiers;
 
-	Extension(String mixinPackage, Map<String, Consumer<ClassNode>> classReplacers) {
+	Extension(
+			String mixinPackage, Map<String, Consumer<ClassNode>> classReplacers,
+			Map<String, Set<Consumer<ClassNode>>> postClassModifiers
+	) {
 		this.mixinPackage = mixinPackage;
 		this.classReplacers = classReplacers;
+		this.postClassModifiers = postClassModifiers;
 	}
 
 	@Override
@@ -52,6 +58,13 @@ final class Extension implements IExtension {
 				//For some reason Mixin likes to tack interfaces into the Mixin'd class's signature
 				//This also likes to crash if the JVM has to resolve said signature
 				node.signature = node.signature.replace('L' + mixinPackage + info.getName() + ';', "");
+			}
+
+			Set<Consumer<ClassNode>> transformations = postClassModifiers.get(node.name);
+			if (transformations != null) {
+				for (Consumer<ClassNode> transformer : transformations) {
+					transformer.accept(node);
+				}
 			}
 		}
 	}

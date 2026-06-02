@@ -289,8 +289,7 @@ public final class Plugin implements IMixinConfigPlugin {
 			throw new IllegalStateException("Running with a transformer that doesn't have extensions?", e);
 		}
 
-		extensions.add(new Extension(mixinPackage, classReplacers));
-		extensions.add(new PostTransform(postClassModifiers));
+		extensions.add(new Extension(mixinPackage, classReplacers, postClassModifiers));
 		ExtensionClassExporter exporter = extensions.getExtension(ExtensionClassExporter.class);
 		CasualStreamHandler.dumper = (name, bytes) -> {
 			ClassNode node = new ClassNode(); //Read the bytes in as per TreeTransformer#readClass(byte[])
