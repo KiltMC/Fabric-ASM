@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.ArrayList;
@@ -90,6 +91,13 @@ public final class Plugin implements IMixinConfigPlugin {
 	@Override
 	public void onLoad(String rawMixinPackage) {
 		String mixinPackage = rawMixinPackage.replace('.', '/');
+
+		// Initialize MixinExtras now so our extension is always registered after the extensions added by MixinExtras.
+		try {
+			Class<?> mixinExtrasBootstrap = Class.forName("com.llamalad7.mixinextras.MixinExtrasBootstrap");
+			Method init = mixinExtrasBootstrap.getMethod("init");
+			init.invoke(null);
+		} catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException | IllegalAccessException ignored) {}
 
 		Map<String, Set<String>> transforms = new HashMap<>();
 		try {
