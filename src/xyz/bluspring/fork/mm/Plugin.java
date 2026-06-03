@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.ArrayList;
@@ -90,6 +91,13 @@ public final class Plugin implements IMixinConfigPlugin {
 	@Override
 	public void onLoad(String rawMixinPackage) {
 		String mixinPackage = rawMixinPackage.replace('.', '/');
+
+		// Initialize MixinExtras now so our extension is always registered after the extensions added by MixinExtras.
+		try {
+			Class<?> mixinExtrasBootstrap = Class.forName("com.llamalad7.mixinextras.MixinExtrasBootstrap");
+			Method init = mixinExtrasBootstrap.getMethod("init");
+			init.invoke(null);
+		} catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException | IllegalAccessException ignored) {}
 
 		Map<String, Set<String>> transforms = new HashMap<>();
 		try {
@@ -289,7 +297,7 @@ public final class Plugin implements IMixinConfigPlugin {
 			throw new IllegalStateException("Running with a transformer that doesn't have extensions?", e);
 		}
 
-		extensions.add(new Extension(mixinPackage, classReplacers));
+		extensions.add(new Extension(mixinPackage, classReplacers, postClassModifiers));
 		ExtensionClassExporter exporter = extensions.getExtension(ExtensionClassExporter.class);
 		CasualStreamHandler.dumper = (name, bytes) -> {
 			ClassNode node = new ClassNode(); //Read the bytes in as per TreeTransformer#readClass(byte[])
@@ -408,13 +416,6 @@ public final class Plugin implements IMixinConfigPlugin {
 
 	@Override
 	public void postApply(String targetClassName, ClassNode targetClass, String mixinClassName, IMixinInfo mixinInfo) {
-		Set<Consumer<ClassNode>> transformations = postClassModifiers.get(targetClassName.replace('.', '/'));
-		if (transformations != null) {
-			for (Consumer<ClassNode> transformer : transformations) {
-				transformer.accept(targetClass);
-			}
-		}
-
 		targetClass.interfaces.remove(mixinClassName.replace('.', '/'));
 	}
 }
