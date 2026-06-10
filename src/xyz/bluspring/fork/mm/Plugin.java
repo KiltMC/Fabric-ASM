@@ -7,6 +7,7 @@
  */
 package xyz.bluspring.fork.mm;
 
+import java.io.File;
 import java.io.IOException;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
@@ -299,11 +300,23 @@ public final class Plugin implements IMixinConfigPlugin {
 
 		extensions.add(new Extension(mixinPackage, classReplacers, postClassModifiers));
 		ExtensionClassExporter exporter = extensions.getExtension(ExtensionClassExporter.class);
+		File exportDirectory = getExportDirectory(exporter);
 		CasualStreamHandler.dumper = (name, bytes) -> {
+			if (exportDirectory != null && new File(exportDirectory, name.replace('.', '/') + ".class").exists()) return;
 			ClassNode node = new ClassNode(); //Read the bytes in as per TreeTransformer#readClass(byte[])
 			new ClassReader(bytes).accept(node, ClassReader.EXPAND_FRAMES);
 			exporter.export(MixinEnvironment.getCurrentEnvironment(), name, false, node);
 		};
+	}
+
+	private static File getExportDirectory(ExtensionClassExporter exporter) {
+		try {
+			Field exportDirectoryField = ExtensionClassExporter.class.getDeclaredField("classExportDir");
+			exportDirectoryField.setAccessible(true);
+			return (File) exportDirectoryField.get(exporter);
+		} catch (NoSuchFieldException | IllegalAccessException e) {
+			return null;
+		}
 	}
 
 	static byte[] makeMixinBlob(String name, Collection<? extends String> targets) {
